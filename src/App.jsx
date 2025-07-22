@@ -38,12 +38,12 @@ export const App = () => {
 
   const handleSortAlphabetically = () => {
     setSortMode('alphabetical');
-    updateGoods('alphabetical');
+    updateGoods('alphabetical', isReversed);
   };
 
   const handleSortByLength = () => {
     setSortMode('length');
-    updateGoods('length');
+    updateGoods('length', isReversed);
   };
 
   const handleReverse = () => {
