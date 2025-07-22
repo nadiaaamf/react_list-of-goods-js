@@ -1,6 +1,6 @@
+import { useState } from 'react';
 import 'bulma/css/bulma.css';
 import './App.scss';
-import { useState } from 'react';
 
 export const goodsFromServer = [
   'Dumplings',
@@ -16,61 +16,66 @@ export const goodsFromServer = [
 ];
 
 export const App = () => {
-  const [goods, setGoods] = useState([...goodsFromServer]);
-  const [sortType, setSortType] = useState('');
+  const [visibleGoods, setVisibleGoods] = useState(goodsFromServer);
+  const [sortMode, setSortMode] = useState(null);
   const [isReversed, setIsReversed] = useState(false);
 
-  const handleAlphabeticalSort = () => {
-    const sorted = [...goodsFromServer].sort((good1, good2) =>
-      // eslint-disable-next-line prettier/prettier
-      good1.localeCompare(good2));
+  const updateGoods = (mode, reversed = isReversed) => {
+    const sortedGoods = [...goodsFromServer];
 
-    setGoods(isReversed ? [...sorted].reverse() : sorted);
-    setSortType('alpha');
+    if (mode === 'alphabetical') {
+      sortedGoods.sort((a, b) => a.localeCompare(b));
+    } else if (mode === 'length') {
+      sortedGoods.sort((a, b) => a.length - b.length);
+    }
+
+    if (reversed) {
+      sortedGoods.reverse();
+    }
+
+    setVisibleGoods(sortedGoods);
   };
 
-  const handleLengthSort = () => {
-    const sorted = [...goodsFromServer].sort(
-      (good1, good2) => good1.length - good2.length,
-    );
+  const handleSortAlphabetically = () => {
+    setSortMode('alphabetical');
+    updateGoods('alphabetical');
+  };
 
-    setGoods(isReversed ? [...sorted].reverse() : sorted);
-    setSortType('length');
+  const handleSortByLength = () => {
+    setSortMode('length');
+    updateGoods('length');
   };
 
   const handleReverse = () => {
-    const reversed = [...goods].reverse();
+    const newIsReversed = !isReversed;
 
-    setGoods(reversed);
-    setIsReversed(prev => !prev);
+    setIsReversed(newIsReversed);
+    updateGoods(sortMode, newIsReversed);
   };
 
   const handleReset = () => {
-    setGoods([...goodsFromServer]);
-    setSortType('');
+    setSortMode(null);
     setIsReversed(false);
+    setVisibleGoods(goodsFromServer);
   };
 
-  const isModified =
-    sortType !== '' ||
-    isReversed ||
-    JSON.stringify(goods) !== JSON.stringify(goodsFromServer);
+  const isModified = sortMode !== null || isReversed !== false;
 
   return (
     <div className="section content">
       <div className="buttons">
         <button
           type="button"
-          className={`button is-info ${sortType !== 'alpha' ? 'is-light' : ''}`}
-          onClick={handleAlphabeticalSort}
+          className={`button is-info ${sortMode !== 'alphabetical' ? 'is-light' : ''}`}
+          onClick={handleSortAlphabetically}
         >
           Sort alphabetically
         </button>
 
         <button
           type="button"
-          className={`button is-success ${sortType !== 'length' ? 'is-light' : ''}`}
-          onClick={handleLengthSort}
+          className={`button is-success ${sortMode !== 'length' ? 'is-light' : ''}`}
+          onClick={handleSortByLength}
         >
           Sort by length
         </button>
@@ -95,7 +100,7 @@ export const App = () => {
       </div>
 
       <ul>
-        {goods.map(good => (
+        {visibleGoods.map(good => (
           <li key={good} data-cy="Good">
             {good}
           </li>
